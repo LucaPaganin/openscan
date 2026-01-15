@@ -2,11 +2,13 @@
 
 ## Epic Overview
 
-**Goal**: Establish the foundational project structure for a cross-platform document scanner app with a cloud backend. This epic creates the scaffolding upon which all future features will be built.
+**Goal**: Establish the foundational Flutter project structure for a cross-platform document scanner app. Backend scaffolding is deferred to Phase 2 (Epic 9). This epic creates the mobile app foundation upon which all Phase 1 features will be built.
 
 **Duration**: 1 Sprint (1 week)
 
 **Epic Owner**: Luca (Scrum Master)
+
+**Phase**: 1 (Flutter MVP — No Backend Required)
 
 ---
 
@@ -14,10 +16,10 @@
 
 By the end of this epic:
 - [ ] Flutter mobile app runs on both iOS and Android emulators/simulators
-- [ ] FastAPI backend runs locally and responds to health check endpoint
 - [ ] Project structure follows established conventions and is ready for feature development
 - [ ] Basic navigation shell exists (empty screens as placeholders)
 - [ ] State management is configured and demonstrated with a simple example
+- [ ] Local storage foundation is in place
 - [ ] All code passes linting with zero warnings
 
 ---
@@ -61,8 +63,7 @@ mobile/
 │   ├── app.dart                    # App widget, theme, router setup
 │   ├── core/
 │   │   ├── constants/
-│   │   │   ├── app_constants.dart
-│   │   │   └── api_constants.dart
+│   │   │   └── app_constants.dart
 │   │   ├── theme/
 │   │   │   ├── app_theme.dart
 │   │   │   └── app_colors.dart
@@ -88,7 +89,7 @@ mobile/
 │   ├── shared/
 │   │   ├── widgets/
 │   │   └── services/
-│   │       └── api_client.dart
+│   │       └── storage_service.dart
 │   └── router/
 │       └── app_router.dart
 ├── assets/
@@ -98,46 +99,20 @@ mobile/
 └── pubspec.yaml
 ```
 
-Backend structure (`/backend`):
-```
-backend/
-├── app/
-│   ├── __init__.py
-│   ├── main.py                     # FastAPI app entry point
-│   ├── core/
-│   │   ├── config.py               # Settings/env management
-│   │   └── logging.py
-│   ├── api/
-│   │   ├── __init__.py
-│   │   ├── routes/
-│   │   │   ├── __init__.py
-│   │   │   └── health.py
-│   │   └── deps.py                 # Dependency injection
-│   ├── services/
-│   │   └── __init__.py
-│   └── models/
-│       └── __init__.py
-├── tests/
-│   └── test_health.py
-├── requirements.txt
-├── requirements-dev.txt
-├── Dockerfile
-├── docker-compose.yml
-└── .env.example
-```
-
 Root structure:
 ```
 openscan/
 ├── mobile/                         # Flutter app
-├── backend/                        # FastAPI backend
 ├── docs/                           # Documentation
 │   └── specs/                      # Feature specifications
 ├── .github/
 │   └── workflows/                  # CI/CD pipelines
+├── CLAUDE.md                       # Development standards
 ├── README.md
 └── .gitignore
 ```
+
+**Note**: `/backend` folder will be added in Phase 2 (Epic 9) when curve flattening is implemented.
 
 ---
 
@@ -266,95 +241,69 @@ static const backgroundDark = Color(0xFF1E1E1E);
 
 ---
 
-### US-1.6: Backend Project Initialization
+### US-1.6: Local Storage Foundation
 
 **As a** developer  
-**I want** a FastAPI backend scaffolded  
-**So that** I can add processing endpoints in future sprints
+**I want** a local storage solution configured  
+**So that** I can persist documents and settings on-device
 
 **Acceptance Criteria**:
-- FastAPI project created with proper structure
-- Health check endpoint: `GET /health` returns `{"status": "healthy", "version": "0.1.0"}`
-- CORS configured for local development
-- Environment variable management via `pydantic-settings`
-- Runs locally with `uvicorn`
-- Docker support with `Dockerfile` and `docker-compose.yml`
-
-**Dependencies** (`requirements.txt`):
-```
-fastapi>=0.110.0
-uvicorn[standard]>=0.27.0
-pydantic>=2.6.0
-pydantic-settings>=2.2.0
-python-multipart>=0.0.9
-```
-
-**Health Endpoint** (`app/api/routes/health.py`):
-```python
-from fastapi import APIRouter
-
-router = APIRouter()
-
-@router.get("/health")
-async def health_check():
-    return {"status": "healthy", "version": "0.1.0"}
-```
-
----
-
-### US-1.7: API Client Setup (Mobile)
-
-**As a** developer  
-**I want** an HTTP client configured in the mobile app  
-**So that** I can communicate with the backend
-
-**Acceptance Criteria**:
-- Dio HTTP client installed and configured
-- Base API client class with:
-  - Base URL configuration (from environment/constants)
-  - Request/response interceptors for logging
-  - Error handling wrapper
-- Health check call demonstrates connectivity
+- Path provider configured for accessing app directories
+- Storage service abstraction created
+- Basic file operations: save, load, delete, list
+- Settings persistence (e.g., theme preference)
 
 **Dependencies**:
 ```yaml
 dependencies:
-  dio: ^5.4.0
-  pretty_dio_logger: ^1.3.1
+  path_provider: ^2.1.2
+  shared_preferences: ^2.2.2
 ```
 
-**API Client** (`lib/shared/services/api_client.dart`):
+**Storage Service** (`lib/shared/services/storage_service.dart`):
 ```dart
-class ApiClient {
-  late final Dio _dio;
-  
-  ApiClient({required String baseUrl}) {
-    _dio = Dio(BaseOptions(
-      baseUrl: baseUrl,
-      connectTimeout: const Duration(seconds: 30),
-      receiveTimeout: const Duration(seconds: 30),
-    ));
-    
-    _dio.interceptors.add(PrettyDioLogger(
-      requestHeader: true,
-      requestBody: true,
-      responseHeader: true,
-    ));
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+
+class StorageService {
+  Future<Directory> get _documentsDir async {
+    final appDir = await getApplicationDocumentsDirectory();
+    final docsDir = Directory('${appDir.path}/scans');
+    if (!await docsDir.exists()) {
+      await docsDir.create(recursive: true);
+    }
+    return docsDir;
   }
-  
-  Future<Response<T>> get<T>(String path) async {
-    return _dio.get<T>(path);
+
+  Future<File> saveFile(String filename, List<int> bytes) async {
+    final dir = await _documentsDir;
+    final file = File('${dir.path}/$filename');
+    return file.writeAsBytes(bytes);
   }
-  
-  Future<Response<T>> post<T>(String path, {dynamic data}) async {
-    return _dio.post<T>(path, data: data);
+
+  Future<List<FileSystemEntity>> listFiles() async {
+    final dir = await _documentsDir;
+    return dir.listSync();
+  }
+
+  Future<void> deleteFile(String filename) async {
+    final dir = await _documentsDir;
+    final file = File('${dir.path}/$filename');
+    if (await file.exists()) {
+      await file.delete();
+    }
   }
 }
 ```
 
+**Tests Required**:
+- ✅ `saveFile` creates file in correct directory
+- ✅ `deleteFile` handles non-existent file gracefully
+```
+
 ---
 
-### US-1.8: Linting and Code Quality
+### US-1.7: Linting and Code Quality
 
 **As a** developer  
 **I want** strict linting rules enforced  
@@ -362,7 +311,6 @@ class ApiClient {
 
 **Acceptance Criteria**:
 - Flutter: `flutter_lints` with custom rules in `analysis_options.yaml`
-- Python: `ruff` for linting and formatting
 - Pre-commit hooks configured (optional but recommended)
 - Zero lint warnings in initial codebase
 
@@ -385,29 +333,17 @@ analyzer:
     missing_return: error
 ```
 
-**Python** (`pyproject.toml`):
-```toml
-[tool.ruff]
-line-length = 100
-select = ["E", "F", "W", "I", "N", "UP", "B", "C4"]
-
-[tool.ruff.isort]
-known-first-party = ["app"]
-```
-
 ---
 
-### US-1.9: Basic CI Pipeline
+### US-1.8: Basic CI Pipeline
 
 **As a** developer  
 **I want** a CI pipeline that runs on every push  
 **So that** code quality is automatically verified
 
 **Acceptance Criteria**:
-- GitHub Actions workflow (or Azure DevOps if preferred)
-- Pipeline runs:
-  - Flutter: `flutter analyze`, `flutter test`
-  - Python: `ruff check`, `pytest`
+- GitHub Actions workflow
+- Pipeline runs: `flutter analyze`, `flutter test`
 - Pipeline triggers on push to `main` and on pull requests
 
 **GitHub Actions** (`.github/workflows/ci.yml`):
@@ -434,20 +370,6 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter test
-
-  backend:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - run: pip install -r requirements.txt -r requirements-dev.txt
-      - run: ruff check .
-      - run: pytest
 ```
 
 ---
@@ -461,24 +383,8 @@ jobs:
 - Flutter SDK 3.19+
 - Xcode 15+ (for iOS)
 - Android Studio (for Android emulator)
-- Python 3.11+
-- Docker Desktop
 
 **Note**: Flutter 3.19 supports macOS Monterey, but check compatibility. If issues arise, Flutter 3.16 is a safe fallback.
-
-### Configuration Files
-
-**Mobile** (`mobile/.env.example`):
-```
-API_BASE_URL=http://localhost:8000
-```
-
-**Backend** (`backend/.env.example`):
-```
-APP_ENV=development
-DEBUG=true
-CORS_ORIGINS=http://localhost:3000,http://localhost:8080
-```
 
 ---
 
@@ -488,8 +394,7 @@ CORS_ORIGINS=http://localhost:3000,http://localhost:8080
 - [ ] README.md updated with setup instructions
 - [ ] Flutter app launches on iOS simulator
 - [ ] Flutter app launches on Android emulator
-- [ ] Backend runs locally and `/health` returns expected response
-- [ ] Mobile app successfully calls backend health endpoint (when both running locally)
+- [ ] Storage service successfully saves and retrieves a test file
 - [ ] All linting passes with zero warnings
 - [ ] CI pipeline passes on push
 - [ ] Code reviewed (self-review acceptable for solo development)
@@ -502,8 +407,8 @@ The following are explicitly NOT part of this epic:
 - Camera functionality (Epic 2)
 - Any image processing
 - User authentication
-- Cloud deployment (Azure setup comes in a later epic)
-- Database setup
+- Backend / API (deferred to Phase 2, Epic 9)
+- Cloud deployment
 
 ---
 
@@ -512,20 +417,19 @@ The following are explicitly NOT part of this epic:
 Suggested order for Claude Code:
 
 1. Create root folder structure and `.gitignore`
-2. Initialize Flutter project in `/mobile`
-3. Set up folder structure in Flutter
-4. Add dependencies to `pubspec.yaml`
-5. Implement theme system
-6. Implement Riverpod setup with theme provider
-7. Implement GoRouter with placeholder screens
-8. Implement bottom navigation shell
-9. Set up API client
-10. Initialize Python backend in `/backend`
-11. Implement FastAPI app with health endpoint
-12. Add Docker configuration
-13. Add linting configuration (both projects)
-14. Add CI pipeline
-15. Write README with setup instructions
+2. Add `CLAUDE.md` to repository root
+3. Initialize Flutter project in `/mobile`
+4. Set up folder structure in Flutter
+5. Add dependencies to `pubspec.yaml`
+6. Implement theme system (colors, typography)
+7. Implement Riverpod setup with theme provider
+8. Implement GoRouter with placeholder screens
+9. Implement bottom navigation shell
+10. Implement storage service with basic file operations
+11. Add linting configuration
+12. Add CI pipeline
+13. Write README with setup instructions
+14. Run all tests and verify linting passes
 
 ---
 
@@ -536,8 +440,10 @@ When implementing this epic:
 1. **Use the latest stable versions** of all dependencies at time of implementation
 2. **Include comprehensive comments** explaining architectural decisions
 3. **Create placeholder screens** as simple `Scaffold` widgets with centered text indicating the screen name
-4. **Test each component** before moving to the next
-5. **Commit logically** — one commit per user story is a good cadence
+4. **Write tests for storage service** — at minimum the two scenarios specified in US-1.6
+5. **Test each component** before moving to the next
+6. **Commit logically** — one commit per user story is a good cadence
+7. **Read CLAUDE.md first** — follow the development standards defined there
 
 ---
 
@@ -547,3 +453,4 @@ When implementing this epic:
 - **App Name**: OpenScan
 - **CI Platform**: GitHub Actions
 - **Repository**: New repository
+- **Phase**: Flutter-only MVP (no backend in Phase 1)

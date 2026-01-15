@@ -12,7 +12,7 @@ The codebase must be **runnable and testable at any point in development**. Neve
 
 1. **No broken commits** — Every commit must pass linting and all existing tests
 2. **Incremental implementation** — Build features in small, working increments
-3. **Run before commit** — Always run `flutter analyze` and `flutter test` (mobile) or `ruff check` and `pytest` (backend) before committing
+3. **Run before commit** — Always run `flutter analyze` and `flutter test` (mobile) or `uv run ruff check` and `uv run pytest` (backend) before committing
 
 ---
 
@@ -137,7 +137,40 @@ Before adding a dependency:
 ### Version Pinning
 
 - **Flutter**: Use caret syntax `^1.2.3` for minor version flexibility
-- **Python**: Pin exact versions in `requirements.txt` for reproducibility
+- **Python**: Use `uv` with `pyproject.toml` and `uv.lock` for dependency management
+
+### Python Dependency Management (Backend)
+
+The backend **must** use `uv` as the package manager:
+
+1. **`pyproject.toml`** — Define all dependencies here (not in `requirements.txt`)
+2. **`uv.lock`** — Lock file for reproducible builds (auto-generated, commit to repo)
+3. **Never use `pip install` directly** — Always use `uv add <package>` or `uv sync`
+
+**Common commands:**
+```bash
+# Install all dependencies from lock file
+uv sync
+
+# Add a new dependency
+uv add <package>
+
+# Add a dev dependency
+uv add --dev <package>
+
+# Update dependencies
+uv lock --upgrade
+
+# Run a command in the virtual environment
+uv run pytest
+uv run ruff check
+```
+
+**Pre-commit workflow:**
+```bash
+uv run ruff check
+uv run pytest
+```
 
 ---
 
