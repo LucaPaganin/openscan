@@ -1,1 +1,45 @@
+# macOS
 .DS_Store
+*.swp
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Flutter/Dart (mobile/)
+mobile/.dart_tool/
+mobile/.packages
+mobile/.pub-cache/
+mobile/.pub/
+mobile/build/
+mobile/*.lock
+!mobile/pubspec.lock
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+
+# iOS (mobile/ios/)
+mobile/ios/Pods/
+mobile/ios/.symlinks/
+mobile/ios/Flutter/Flutter.framework
+mobile/ios/Flutter/Flutter.podspec
+mobile/ios/Flutter/Generated.xcconfig
+mobile/ios/Flutter/ephemeral/
+mobile/ios/Flutter/flutter_export_environment.sh
+
+# Android (mobile/android/)
+mobile/android/.gradle/
+mobile/android/local.properties
+mobile/android/key.properties
+mobile/android/*.jks
+
+# Generated code
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+
+# Coverage
+coverage/
+
+# Misc
+*.log
