@@ -299,7 +299,7 @@ class StorageService {
 **Tests Required**:
 - ✅ `saveFile` creates file in correct directory
 - ✅ `deleteFile` handles non-existent file gracefully
-```
+
 
 ---
 

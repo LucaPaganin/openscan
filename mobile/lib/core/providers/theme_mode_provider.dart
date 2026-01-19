@@ -15,5 +15,6 @@ class ThemeModeNotifier extends _$ThemeModeNotifier {
   void toggle() => state = !state;
 
   /// Set a specific theme mode.
+  // ignore: use_setters_to_change_properties
   void setDarkMode({required bool enabled}) => state = enabled;
 }

@@ -7,8 +7,8 @@ import 'package:go_router/go_router.dart';
 /// Each tab maintains its own navigation stack.
 class ScaffoldWithNavBar extends StatelessWidget {
   const ScaffoldWithNavBar({
-    super.key,
     required this.navigationShell,
+    super.key,
   });
 
   /// The navigation shell that manages the current tab state.

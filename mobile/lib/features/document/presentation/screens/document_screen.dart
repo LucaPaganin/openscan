@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 /// This will be replaced with actual document viewer in Epic 4.
 class DocumentScreen extends StatelessWidget {
   const DocumentScreen({
-    super.key,
     required this.documentId,
+    super.key,
   });
 
   /// The ID of the document to display.

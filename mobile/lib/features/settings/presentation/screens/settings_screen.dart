@@ -36,18 +36,18 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ],
           ),
-          _SettingsSection(
+          const _SettingsSection(
             title: 'About',
             children: [
               ListTile(
-                leading: const Icon(Icons.info_outline),
-                title: const Text('Version'),
-                subtitle: const Text('1.0.0'),
+                leading: Icon(Icons.info_outline),
+                title: Text('Version'),
+                subtitle: Text('1.0.0'),
               ),
               ListTile(
-                leading: const Icon(Icons.code),
-                title: const Text('OpenScan'),
-                subtitle: const Text('Document Scanner App'),
+                leading: Icon(Icons.code),
+                title: Text('OpenScan'),
+                subtitle: Text('Document Scanner App'),
               ),
             ],
           ),
