@@ -39,6 +39,9 @@ dependencies:
   flutter_riverpod: ^2.5.1
   riverpod_annotation: ^2.3.5
 
+  # Declarative routing
+  go_router: ^14.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
