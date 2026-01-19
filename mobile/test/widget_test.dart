@@ -1,30 +1,44 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:openscan/main.dart';
+import 'package:openscan/app.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  group('OpenScanApp', () {
+    testWidgets('renders app with OpenScan title', (WidgetTester tester) async {
+      // Build our app wrapped in ProviderScope and trigger a frame.
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: OpenScanApp(),
+        ),
+      );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+      // Verify that the app renders with the OpenScan title.
+      expect(find.text('OpenScan'), findsAtLeast(1));
+    });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    testWidgets('theme toggle button changes theme mode', (
+      WidgetTester tester,
+    ) async {
+      // Build our app wrapped in ProviderScope.
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: OpenScanApp(),
+        ),
+      );
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+      // Initially should be in light mode - find dark mode icon (toggle to dark).
+      expect(find.byIcon(Icons.dark_mode), findsOneWidget);
+      expect(find.text('Theme: Light'), findsOneWidget);
+
+      // Tap the theme toggle button.
+      await tester.tap(find.byIcon(Icons.dark_mode));
+      await tester.pumpAndSettle();
+
+      // Should now be in dark mode - find light mode icon (toggle to light).
+      expect(find.byIcon(Icons.light_mode), findsOneWidget);
+      expect(find.text('Theme: Dark'), findsOneWidget);
+    });
   });
 }
