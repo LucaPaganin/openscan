@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/camera_controller_provider.dart';
+import '../providers/flash_mode_provider.dart';
+import 'camera_controls_bar.dart';
 import 'camera_loading_view.dart';
 import 'camera_preview.dart';
-import 'capture_button.dart';
 
-/// Complete camera view with preview and capture button.
+/// Complete camera view with preview and controls bar.
 ///
-/// Handles camera initialization, lifecycle management, and capture flow.
+/// Handles camera initialization, lifecycle management, flash control,
+/// camera flip, and capture flow.
 class CameraView extends ConsumerStatefulWidget {
   const CameraView({
     super.key,
@@ -57,6 +59,12 @@ class _CameraViewState extends ConsumerState<CameraView>
   }
 
   Future<void> _handleCapture() async {
+    // Apply flash mode before capture
+    final flashMode = ref.read(flashModeNotifierProvider);
+    await ref
+        .read(cameraControllerNotifierProvider.notifier)
+        .setFlashMode(flashMode);
+
     final capturedImage = await ref
         .read(cameraControllerNotifierProvider.notifier)
         .capture();
@@ -75,9 +83,28 @@ class _CameraViewState extends ConsumerState<CameraView>
     }
   }
 
+  void _handleFlashToggle() {
+    ref.read(flashModeNotifierProvider.notifier).cycle();
+    // Apply the new flash mode to the camera
+    final newFlashMode = ref.read(flashModeNotifierProvider);
+    ref
+        .read(cameraControllerNotifierProvider.notifier)
+        .setFlashMode(newFlashMode);
+  }
+
+  Future<void> _handleCameraFlip() async {
+    await ref.read(cameraControllerNotifierProvider.notifier).flipCamera();
+    // Re-apply flash mode after flip
+    final flashMode = ref.read(flashModeNotifierProvider);
+    await ref
+        .read(cameraControllerNotifierProvider.notifier)
+        .setFlashMode(flashMode);
+  }
+
   @override
   Widget build(BuildContext context) {
     final cameraState = ref.watch(cameraControllerNotifierProvider);
+    final flashMode = ref.watch(flashModeNotifierProvider);
 
     // Show loading while camera is initializing
     if (!cameraState.isInitialized || cameraState.controller == null) {
@@ -97,32 +124,21 @@ class _CameraViewState extends ConsumerState<CameraView>
         // Camera preview
         CameraPreviewWidget(controller: cameraState.controller!),
 
-        // Capture button at bottom
+        // Controls bar at bottom
         Positioned(
           left: 0,
           right: 0,
           bottom: 0,
-          child: _buildControlsBar(cameraState),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildControlsBar(CameraState cameraState) {
-    return ColoredBox(
-      color: Colors.black.withAlpha(128),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24),
-          child: Center(
-            child: CaptureButton(
-              onPressed: _handleCapture,
-              isCapturing: cameraState.isCapturing,
-            ),
+          child: CameraControlsBar(
+            onCapture: _handleCapture,
+            onFlashToggle: _handleFlashToggle,
+            onCameraFlip: _handleCameraFlip,
+            flashMode: flashMode,
+            isCapturing: cameraState.isCapturing,
+            canFlip: cameraState.canFlip,
           ),
         ),
-      ),
+      ],
     );
   }
 
