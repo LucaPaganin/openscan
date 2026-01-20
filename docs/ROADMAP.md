@@ -41,13 +41,16 @@ A cross-platform mobile document scanner app with book curve flattening capabili
 | E6 | Perspective Correction | 4-point transform to flatten | 1 | E5 |
 | E7 | Image Enhancement | B&W, grayscale, contrast filters | 1 | E6 |
 | E8 | Multi-page & PDF | Batch scanning, page order, PDF export | 2 | E7 |
+| E9 | Auto-Capture | Stability detection, 1.5s trigger | 1 | E4 |
 
-**Phase 1 Total: ~10 sprints (10 weeks)**
+**Phase 1 Total: ~11 sprints (11 weeks)**
 
 ```
 E1 ──▶ E2 ──▶ E3
               │
               ├──▶ E4 ──▶ E5 ──▶ E6 ──▶ E7 ──▶ E8
+              │     │
+              │     └──▶ E9 (Auto-Capture)
               │
          [MVP COMPLETE]
 ```
@@ -72,12 +75,11 @@ A working app that can:
 
 | Epic | Name | Description | Sprints | Dependencies |
 |------|------|-------------|---------|--------------|
-| E9 | Backend Setup | FastAPI, Azure deployment, API client | 2 | E8 |
-| E10 | Curve Detection | Detect curved text lines on book pages | 2-3 | E9 |
-| E11 | Curve Flattening | Dewarp algorithm, API integration | 3-4 | E10 |
-| E12 | Auto-Capture | Stability detection, auto-trigger | 1-2 | E11 |
+| E10 | Backend Setup | FastAPI, Azure deployment, API client | 2 | E8 |
+| E11 | Curve Detection | Detect curved text lines on book pages | 2-3 | E10 |
+| E12 | Curve Flattening | Dewarp algorithm, API integration | 3-4 | E11 |
 
-**Phase 2 Total: ~8-11 sprints**
+**Phase 2 Total: ~7-9 sprints**
 
 ### Phase 2 Deliverable
 
@@ -94,29 +96,29 @@ A working app that can:
 
 | Epic | Name | Description | Sprints | Dependencies |
 |------|------|-------------|---------|--------------|
-| E13 | OCR Integration | Text extraction via backend | 2 | E11 |
+| E13 | OCR Integration | Text extraction via backend | 2 | E12 |
 | E14 | Search & Organization | Full-text search, folders, tags | 2 | E13 |
 
 ---
 
 ## Epic Status Tracker
 
-| Epic | Status | Started | Completed | Notes |
-|------|--------|---------|-----------|-------|
-| E1 | 🔲 Not Started | — | — | |
-| E2 | 🔲 Not Started | — | — | |
-| E3 | 🔲 Not Started | — | — | |
-| E4 | 🔲 Not Started | — | — | |
-| E5 | 🔲 Not Started | — | — | |
-| E6 | 🔲 Not Started | — | — | |
-| E7 | 🔲 Not Started | — | — | |
-| E8 | 🔲 Not Started | — | — | |
-| E9 | 🔲 Not Started | — | — | |
-| E10 | 🔲 Not Started | — | — | |
-| E11 | 🔲 Not Started | — | — | |
-| E12 | 🔲 Not Started | — | — | |
-| E13 | 🔲 Not Started | — | — | Optional |
-| E14 | 🔲 Not Started | — | — | Optional |
+| Epic | Name | Status | Started | Completed | Notes |
+|------|------|--------|---------|-----------|-------|
+| E1 | Project Setup | 🔲 Not Started | — | — | |
+| E2 | Camera Module | 🔲 Not Started | — | — | |
+| E3 | Local Gallery | 🔲 Not Started | — | — | |
+| E4 | Edge Detection | 🔲 Not Started | — | — | |
+| E5 | Manual Corner Adjust | 🔲 Not Started | — | — | |
+| E6 | Perspective Correction | 🔲 Not Started | — | — | |
+| E7 | Image Enhancement | 🔲 Not Started | — | — | |
+| E8 | Multi-page & PDF | 🔲 Not Started | — | — | |
+| E9 | Auto-Capture | 🔲 Not Started | — | — | |
+| E10 | Backend Setup | 🔲 Not Started | — | — | Phase 2 |
+| E11 | Curve Detection | 🔲 Not Started | — | — | Phase 2 |
+| E12 | Curve Flattening | 🔲 Not Started | — | — | Phase 2 |
+| E13 | OCR Integration | 🔲 Not Started | — | — | Optional |
+| E14 | Search & Organization | 🔲 Not Started | — | — | Optional |
 
 **Status Legend**: 🔲 Not Started | 🟡 In Progress | ✅ Complete | ⏸️ Blocked
 
