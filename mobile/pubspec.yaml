@@ -56,6 +56,9 @@ dependencies:
   image: ^4.1.7
   photo_view: ^0.14.0
 
+  # Edge detection (E4)
+  opencv_dart: ^1.0.4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
