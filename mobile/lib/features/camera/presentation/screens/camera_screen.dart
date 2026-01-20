@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../gallery/presentation/providers/documents_provider.dart';
 import '../providers/camera_permission_provider.dart';
 import '../widgets/camera_loading_view.dart';
 import '../widgets/camera_permission_denied_view.dart';
@@ -111,10 +113,31 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     }
   }
 
-  void _handleImageCaptured(String imagePath) {
-    // For now, just log the path. In future epics, this will navigate
-    // to the edge detection or document cropping screen.
-    debugPrint('Image captured at: $imagePath');
+  Future<void> _handleImageCaptured(String imagePath) async {
+    try {
+      final documentService = ref.read(documentServiceProvider);
+      final document = await documentService.saveCapture(imagePath);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Scan saved'),
+            action: SnackBarAction(
+              label: 'View',
+              onPressed: () => context.push('/document/${document.id}'),
+            ),
+          ),
+        );
+        // Invalidate documents provider to refresh gallery
+        ref.invalidate(documentsProvider);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save: $e')),
+        );
+      }
+    }
   }
 
   Widget _buildErrorView(BuildContext context, Object error) {

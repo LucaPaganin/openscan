@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/camera/presentation/screens/camera_screen.dart';
-import '../features/document/presentation/screens/document_screen.dart';
+import '../features/document/presentation/screens/document_detail_screen.dart';
 import '../features/gallery/presentation/screens/gallery_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
 import '../shared/widgets/scaffold_with_nav_bar.dart';
@@ -71,7 +71,7 @@ final GoRouter appRouter = GoRouter(
       parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) {
         final documentId = state.pathParameters['id']!;
-        return DocumentScreen(documentId: documentId);
+        return DocumentDetailScreen(documentId: documentId);
       },
     ),
   ],

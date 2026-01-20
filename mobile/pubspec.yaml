@@ -50,6 +50,12 @@ dependencies:
   camera: ^0.10.5+9
   permission_handler: ^11.3.0
 
+  # Gallery and document management (E3)
+  uuid: ^4.3.3
+  json_annotation: ^4.8.1
+  image: ^4.1.7
+  photo_view: ^0.14.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -64,6 +70,7 @@ dev_dependencies:
   # Riverpod code generation
   riverpod_generator: ^2.4.0
   build_runner: ^2.4.9
+  json_serializable: ^6.7.1
 
   # Testing utilities for path_provider
   path_provider_platform_interface: ^2.1.2
