@@ -229,7 +229,7 @@ void main() {
 
   group('CameraScreen', () {
     testWidgets(
-      'shows camera preview placeholder when permission is granted',
+      'shows camera loading view when permission is granted',
       (tester) async {
         final mockService = MockCameraPermissionService(
           initialStatus: PermissionStatus.granted,
@@ -244,11 +244,15 @@ void main() {
           ),
         );
 
-        // Wait for async provider to complete
-        await tester.pumpAndSettle();
+        // Pump once to let the permission provider resolve
+        await tester.pump();
+        await tester.pump();
 
-        // Verify camera preview placeholder is shown
-        expect(find.text('Camera Access Granted'), findsOneWidget);
+        // When permission is granted, CameraView is shown which displays
+        // loading while initializing camera. In tests, camera can't initialize
+        // so we verify the loading state is shown.
+        expect(find.text('Initializing camera...'), findsOneWidget);
+        expect(find.byType(CircularProgressIndicator), findsOneWidget);
       },
     );
 

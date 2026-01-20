@@ -34,9 +34,12 @@ class MockCameraPermissionService implements CameraPermissionService {
 }
 
 void main() {
-  // Create a mock service that returns granted permission for all widget tests.
+  // Create a mock service that returns denied permission for widget tests.
+  // We use denied instead of granted because the CameraView tries to initialize
+  // the actual camera which fails in tests. The permission denied view is
+  // sufficient to test navigation.
   final mockPermissionService = MockCameraPermissionService(
-    initialStatus: PermissionStatus.granted,
+    initialStatus: PermissionStatus.denied,
   );
 
   group('OpenScanApp', () {
@@ -58,8 +61,8 @@ void main() {
 
       // Verify that the app renders with the Camera screen.
       expect(find.text('Camera'), findsAtLeast(1));
-      // With granted permission, we see the placeholder message.
-      expect(find.text('Camera Access Granted'), findsOneWidget);
+      // With denied permission, we see the permission request view.
+      expect(find.text('Camera Access Required'), findsOneWidget);
     });
 
     testWidgets('bottom navigation shows three tabs', (

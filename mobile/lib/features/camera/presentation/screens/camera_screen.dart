@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/camera_permission_provider.dart';
 import '../widgets/camera_loading_view.dart';
 import '../widgets/camera_permission_denied_view.dart';
+import '../widgets/camera_view.dart';
 
 /// Main camera screen that handles permission flow and displays camera preview.
 ///
@@ -47,8 +48,11 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     final permissionState = ref.watch(cameraPermissionNotifierProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Camera'),
+      // Hide app bar for full-screen camera preview when permission granted
+      appBar: permissionState.maybeWhen(
+        data: (state) =>
+            state == CameraPermissionState.granted ? null : _buildAppBar(),
+        orElse: _buildAppBar,
       ),
       body: permissionState.when(
         loading: () => const CameraLoadingView(
@@ -60,19 +64,29 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     );
   }
 
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      title: const Text('Camera'),
+    );
+  }
+
   Widget _buildContentForState(
     BuildContext context,
     CameraPermissionState state,
   ) {
     switch (state) {
       case CameraPermissionState.granted:
-        return _buildCameraPreviewPlaceholder(context);
+        return CameraView(
+          onImageCaptured: _handleImageCaptured,
+        );
 
       case CameraPermissionState.denied:
         return CameraPermissionDeniedView(
           isPermanentlyDenied: false,
           onActionPressed: () {
-            ref.read(cameraPermissionNotifierProvider.notifier).requestPermission();
+            ref
+                .read(cameraPermissionNotifierProvider.notifier)
+                .requestPermission();
           },
         );
 
@@ -87,7 +101,9 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
       case CameraPermissionState.unknown:
         // Auto-request permission on first load
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref.read(cameraPermissionNotifierProvider.notifier).requestPermission();
+          ref
+              .read(cameraPermissionNotifierProvider.notifier)
+              .requestPermission();
         });
         return const CameraLoadingView(
           message: 'Requesting camera permission...',
@@ -95,34 +111,10 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     }
   }
 
-  /// Placeholder for camera preview (to be implemented in US-2.2).
-  Widget _buildCameraPreviewPlaceholder(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.check_circle_outline,
-            size: 80,
-            color: theme.colorScheme.primary,
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Camera Access Granted',
-            style: theme.textTheme.headlineMedium,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Camera preview will be implemented in US-2.2',
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.onSurface.withAlpha(153),
-            ),
-          ),
-        ],
-      ),
-    );
+  void _handleImageCaptured(String imagePath) {
+    // For now, just log the path. In future epics, this will navigate
+    // to the edge detection or document cropping screen.
+    debugPrint('Image captured at: $imagePath');
   }
 
   Widget _buildErrorView(BuildContext context, Object error) {
