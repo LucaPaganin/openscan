@@ -1,33 +1,78 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:openscan/app.dart';
+import 'package:openscan/features/camera/domain/camera_permission_service.dart';
+import 'package:openscan/features/camera/presentation/providers/camera_permission_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+/// Mock implementation of [CameraPermissionService] for widget tests.
+class MockCameraPermissionService implements CameraPermissionService {
+  MockCameraPermissionService({
+    PermissionStatus initialStatus = PermissionStatus.granted,
+  }) : _status = initialStatus;
+
+  final PermissionStatus _status;
+
+  @override
+  Future<PermissionStatus> checkStatus() async => _status;
+
+  @override
+  Future<PermissionStatus> request() async => _status;
+
+  @override
+  Future<bool> openSettings() async => true;
+
+  @override
+  Future<bool> isGranted() async => _status.isGranted;
+
+  @override
+  Future<bool> isDenied() async => _status.isDenied;
+
+  @override
+  Future<bool> isPermanentlyDenied() async => _status.isPermanentlyDenied;
+}
 
 void main() {
+  // Create a mock service that returns granted permission for all widget tests.
+  final mockPermissionService = MockCameraPermissionService(
+    initialStatus: PermissionStatus.granted,
+  );
+
   group('OpenScanApp', () {
     testWidgets('renders app with Camera screen as initial route', (
       WidgetTester tester,
     ) async {
       // Build our app wrapped in ProviderScope and trigger a frame.
       await tester.pumpWidget(
-        const ProviderScope(
-          child: OpenScanApp(),
+        ProviderScope(
+          overrides: [
+            cameraPermissionServiceProvider.overrideWithValue(
+              mockPermissionService,
+            ),
+          ],
+          child: const OpenScanApp(),
         ),
       );
       await tester.pumpAndSettle();
 
       // Verify that the app renders with the Camera screen.
       expect(find.text('Camera'), findsAtLeast(1));
-      expect(find.byIcon(Icons.camera_alt_outlined), findsAtLeast(1));
+      // With granted permission, we see the placeholder message.
+      expect(find.text('Camera Access Granted'), findsOneWidget);
     });
 
     testWidgets('bottom navigation shows three tabs', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: OpenScanApp(),
+        ProviderScope(
+          overrides: [
+            cameraPermissionServiceProvider.overrideWithValue(
+              mockPermissionService,
+            ),
+          ],
+          child: const OpenScanApp(),
         ),
       );
       await tester.pumpAndSettle();
@@ -41,8 +86,13 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: OpenScanApp(),
+        ProviderScope(
+          overrides: [
+            cameraPermissionServiceProvider.overrideWithValue(
+              mockPermissionService,
+            ),
+          ],
+          child: const OpenScanApp(),
         ),
       );
       await tester.pumpAndSettle();
@@ -60,8 +110,13 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: OpenScanApp(),
+        ProviderScope(
+          overrides: [
+            cameraPermissionServiceProvider.overrideWithValue(
+              mockPermissionService,
+            ),
+          ],
+          child: const OpenScanApp(),
         ),
       );
       await tester.pumpAndSettle();
@@ -79,8 +134,13 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: OpenScanApp(),
+        ProviderScope(
+          overrides: [
+            cameraPermissionServiceProvider.overrideWithValue(
+              mockPermissionService,
+            ),
+          ],
+          child: const OpenScanApp(),
         ),
       );
       await tester.pumpAndSettle();
@@ -104,8 +164,13 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: OpenScanApp(),
+        ProviderScope(
+          overrides: [
+            cameraPermissionServiceProvider.overrideWithValue(
+              mockPermissionService,
+            ),
+          ],
+          child: const OpenScanApp(),
         ),
       );
       await tester.pumpAndSettle();
