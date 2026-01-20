@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/camera_controller_provider.dart';
+import '../providers/edge_detection_provider.dart';
 import '../providers/flash_mode_provider.dart';
 import 'camera_controls_bar.dart';
 import 'camera_loading_view.dart';
 import 'camera_preview.dart';
+import 'detection_overlay.dart';
+import 'detection_status_indicator.dart';
 
 /// Complete camera view with preview and controls bar.
 ///
@@ -45,12 +48,18 @@ class _CameraViewState extends ConsumerState<CameraView>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final cameraNotifier = ref.read(cameraControllerNotifierProvider.notifier);
+    final detectionNotifier = ref.read(detectionNotifierProvider.notifier);
+    final cameraController = ref.read(cameraControllerNotifierProvider).controller;
 
     switch (state) {
       case AppLifecycleState.inactive:
         cameraNotifier.pausePreview();
+        detectionNotifier.pauseDetection();
       case AppLifecycleState.resumed:
         cameraNotifier.resumePreview();
+        if (cameraController != null) {
+          detectionNotifier.resumeDetection(cameraController);
+        }
       case AppLifecycleState.paused:
       case AppLifecycleState.detached:
       case AppLifecycleState.hidden:
@@ -105,6 +114,7 @@ class _CameraViewState extends ConsumerState<CameraView>
   Widget build(BuildContext context) {
     final cameraState = ref.watch(cameraControllerNotifierProvider);
     final flashMode = ref.watch(flashModeNotifierProvider);
+    final detection = ref.watch(detectionNotifierProvider);
 
     // Show loading while camera is initializing
     if (!cameraState.isInitialized || cameraState.controller == null) {
@@ -118,11 +128,45 @@ class _CameraViewState extends ConsumerState<CameraView>
       return _buildErrorView(context, cameraState.error!);
     }
 
+    // Start detection when camera is ready
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (cameraState.isInitialized && cameraState.controller != null) {
+        ref
+            .read(detectionNotifierProvider.notifier)
+            .startDetection(cameraState.controller!);
+      }
+    });
+
     return Stack(
       fit: StackFit.expand,
       children: [
         // Camera preview
         CameraPreviewWidget(controller: cameraState.controller!),
+
+        // Detection overlay
+        Positioned.fill(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return DetectionOverlay(
+                detection: detection,
+                previewSize: Size(
+                  constraints.maxWidth,
+                  constraints.maxHeight,
+                ),
+              );
+            },
+          ),
+        ),
+
+        // Detection status indicator at top
+        Positioned(
+          top: MediaQuery.of(context).padding.top + 16,
+          left: 0,
+          right: 0,
+          child: Center(
+            child: DetectionStatusIndicator(detection: detection),
+          ),
+        ),
 
         // Controls bar at bottom
         Positioned(
@@ -136,6 +180,7 @@ class _CameraViewState extends ConsumerState<CameraView>
             flashMode: flashMode,
             isCapturing: cameraState.isCapturing,
             canFlip: cameraState.canFlip,
+            isDocumentDetected: detection?.isHighConfidence ?? false,
           ),
         ),
       ],

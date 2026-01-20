@@ -5,11 +5,13 @@ import 'package:flutter/services.dart';
 ///
 /// Displays a 72x72 white circle with an inner 60x60 bordered circle.
 /// Shows a scale animation when pressed and provides haptic feedback.
+/// Changes color to green when a document is detected.
 class CaptureButton extends StatefulWidget {
   const CaptureButton({
     required this.onPressed,
     super.key,
     this.isCapturing = false,
+    this.isDocumentDetected = false,
   });
 
   /// Callback when the button is pressed.
@@ -18,6 +20,10 @@ class CaptureButton extends StatefulWidget {
   /// Whether a capture is currently in progress.
   /// When true, the button shows a pressed state and ignores taps.
   final bool isCapturing;
+
+  /// Whether a document is currently detected with high confidence.
+  /// When true, the button changes color to green.
+  final bool isDocumentDetected;
 
   @override
   State<CaptureButton> createState() => _CaptureButtonState();
@@ -78,6 +84,12 @@ class _CaptureButtonState extends State<CaptureButton>
   @override
   Widget build(BuildContext context) {
     final showPressed = widget.isCapturing || _isPressed;
+    final buttonColor = widget.isDocumentDetected
+        ? const Color(0xFF4CAF50) // Green when ready
+        : Colors.white;
+    final borderColor = widget.isDocumentDetected
+        ? Colors.white
+        : Colors.black12;
 
     return GestureDetector(
       onTapDown: _handleTapDown,
@@ -92,12 +104,13 @@ class _CaptureButtonState extends State<CaptureButton>
             child: child,
           );
         },
-        child: Container(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
           width: 72,
           height: 72,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: showPressed ? Colors.white70 : Colors.white,
+            color: showPressed ? buttonColor.withValues(alpha: 0.7) : buttonColor,
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withAlpha(51),
@@ -107,22 +120,25 @@ class _CaptureButtonState extends State<CaptureButton>
             ],
           ),
           child: Center(
-            child: Container(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
               width: 60,
               height: 60,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: Colors.black12,
+                  color: borderColor,
                   width: 2,
                 ),
               ),
               child: widget.isCapturing
-                  ? const Padding(
-                      padding: EdgeInsets.all(16),
+                  ? Padding(
+                      padding: const EdgeInsets.all(16),
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Colors.black54,
+                        color: widget.isDocumentDetected
+                            ? Colors.white
+                            : Colors.black54,
                       ),
                     )
                   : null,

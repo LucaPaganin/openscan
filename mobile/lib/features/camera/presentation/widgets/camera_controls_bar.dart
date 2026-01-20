@@ -19,6 +19,7 @@ class CameraControlsBar extends StatelessWidget {
     super.key,
     this.isCapturing = false,
     this.canFlip = true,
+    this.isDocumentDetected = false,
   });
 
   final VoidCallback onCapture;
@@ -27,6 +28,7 @@ class CameraControlsBar extends StatelessWidget {
   final FlashMode flashMode;
   final bool isCapturing;
   final bool canFlip;
+  final bool isDocumentDetected;
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +51,7 @@ class CameraControlsBar extends StatelessWidget {
               CaptureButton(
                 onPressed: onCapture,
                 isCapturing: isCapturing,
+                isDocumentDetected: isDocumentDetected,
               ),
 
               // Flip button
