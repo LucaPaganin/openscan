@@ -10,7 +10,7 @@ part 'flash_mode_provider.g.dart';
 @riverpod
 class FlashModeNotifier extends _$FlashModeNotifier {
   @override
-  FlashMode build() => FlashMode.auto;
+  FlashMode build() => FlashMode.off;
 
   /// Cycles through flash modes: off → auto → always → off
   void cycle() {

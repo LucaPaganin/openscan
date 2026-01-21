@@ -15,16 +15,25 @@ void main() {
       container.dispose();
     });
 
-    test('initializes with FlashMode.auto', () {
+    test('initializes with FlashMode.off', () {
       final flashMode = container.read(flashModeNotifierProvider);
-      expect(flashMode, FlashMode.auto);
+      expect(flashMode, FlashMode.off);
+    });
+
+    test('cycles from off to auto', () {
+      final notifier = container.read(flashModeNotifierProvider.notifier);
+
+      // Initial state is off
+      expect(container.read(flashModeNotifierProvider), FlashMode.off);
+
+      // Cycle: off → auto
+      notifier.cycle();
+      expect(container.read(flashModeNotifierProvider), FlashMode.auto);
     });
 
     test('cycles from auto to always', () {
-      final notifier = container.read(flashModeNotifierProvider.notifier);
-
-      // Initial state is auto
-      expect(container.read(flashModeNotifierProvider), FlashMode.auto);
+      final notifier = container.read(flashModeNotifierProvider.notifier)
+        ..setMode(FlashMode.auto);
 
       // Cycle: auto → always
       notifier.cycle();
@@ -40,19 +49,14 @@ void main() {
       expect(container.read(flashModeNotifierProvider), FlashMode.off);
     });
 
-    test('cycles from off to auto', () {
-      final notifier = container.read(flashModeNotifierProvider.notifier)
-        ..setMode(FlashMode.off);
-
-      // Cycle: off → auto
-      notifier.cycle();
-      expect(container.read(flashModeNotifierProvider), FlashMode.auto);
-    });
-
-    test('completes full cycle: auto → always → off → auto', () {
+    test('completes full cycle: off → auto → always → off', () {
       final notifier = container.read(flashModeNotifierProvider.notifier);
 
-      // Start at auto
+      // Start at off
+      expect(container.read(flashModeNotifierProvider), FlashMode.off);
+
+      // off → auto
+      notifier.cycle();
       expect(container.read(flashModeNotifierProvider), FlashMode.auto);
 
       // auto → always
@@ -62,22 +66,18 @@ void main() {
       // always → off
       notifier.cycle();
       expect(container.read(flashModeNotifierProvider), FlashMode.off);
-
-      // off → auto
-      notifier.cycle();
-      expect(container.read(flashModeNotifierProvider), FlashMode.auto);
     });
 
     test('setMode sets flash mode to specific value', () {
       final notifier = container.read(flashModeNotifierProvider.notifier)
-        ..setMode(FlashMode.off);
-      expect(container.read(flashModeNotifierProvider), FlashMode.off);
+        ..setMode(FlashMode.auto);
+      expect(container.read(flashModeNotifierProvider), FlashMode.auto);
 
       notifier.setMode(FlashMode.always);
       expect(container.read(flashModeNotifierProvider), FlashMode.always);
 
-      notifier.setMode(FlashMode.auto);
-      expect(container.read(flashModeNotifierProvider), FlashMode.auto);
+      notifier.setMode(FlashMode.off);
+      expect(container.read(flashModeNotifierProvider), FlashMode.off);
     });
 
     test('handles torch mode by cycling to auto', () {
