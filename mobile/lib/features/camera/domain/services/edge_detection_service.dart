@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:opencv_dart/opencv_dart.dart' as cv;
 
@@ -14,12 +15,17 @@ class EdgeDetectionService {
   /// or null if no document detected.
   Future<DetectedDocument?> detectEdges(Uint8List imageBytes) async {
     try {
+      debugPrint('EdgeDetectionService: decoding image (${imageBytes.length} bytes)');
       // Decode image
       final mat = cv.imdecode(imageBytes, cv.IMREAD_COLOR);
-      if (mat.isEmpty) return null;
+      if (mat.isEmpty) {
+        debugPrint('EdgeDetectionService: failed to decode image');
+        return null;
+      }
 
       final imageWidth = mat.cols;
       final imageHeight = mat.rows;
+      debugPrint('EdgeDetectionService: image size ${imageWidth}x$imageHeight');
 
       // Convert to grayscale
       final gray = cv.cvtColor(mat, cv.COLOR_BGR2GRAY);
@@ -36,6 +42,7 @@ class EdgeDetectionService {
         cv.RETR_LIST,
         cv.CHAIN_APPROX_SIMPLE,
       );
+      debugPrint('EdgeDetectionService: found ${contours.$1.length} contours');
 
       // Find the largest quadrilateral contour
       final quad = _findLargestQuadrilateral(
@@ -43,6 +50,7 @@ class EdgeDetectionService {
         imageWidth,
         imageHeight,
       );
+      debugPrint('EdgeDetectionService: quad result = $quad');
 
       // Cleanup
       mat.dispose();
@@ -52,6 +60,7 @@ class EdgeDetectionService {
 
       return quad;
     } catch (e) {
+      debugPrint('EdgeDetectionService: error $e');
       throw EdgeDetectionException('Failed to detect edges: $e');
     }
   }

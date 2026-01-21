@@ -37,8 +37,10 @@ class FrameProcessor {
     _isStreaming = true;
     _lastProcessedTime = DateTime.now();
 
+    debugPrint('Starting image stream for edge detection');
     try {
       controller.startImageStream(_processFrame);
+      debugPrint('Image stream started successfully');
     } catch (e) {
       debugPrint('Failed to start image stream: $e');
       _isStreaming = false;
@@ -58,10 +60,13 @@ class FrameProcessor {
     _lastProcessedTime = now;
 
     try {
+      debugPrint('Processing frame: ${image.width}x${image.height}, format: ${image.format.group}');
       // Convert CameraImage to bytes that OpenCV can decode
       final bytes = await _convertCameraImageToJpeg(image);
+      debugPrint('Converted to JPEG: ${bytes?.length ?? 0} bytes');
       if (bytes != null) {
         final result = await _edgeService.detectEdges(bytes);
+        debugPrint('Detection result: $result');
         _resultController?.add(result);
       }
     } catch (e) {

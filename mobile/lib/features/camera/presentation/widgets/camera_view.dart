@@ -29,6 +29,8 @@ class CameraView extends ConsumerStatefulWidget {
 
 class _CameraViewState extends ConsumerState<CameraView>
     with WidgetsBindingObserver {
+  bool _detectionStarted = false;
+
   @override
   void initState() {
     super.initState();
@@ -68,6 +70,12 @@ class _CameraViewState extends ConsumerState<CameraView>
   }
 
   Future<void> _handleCapture() async {
+    final cameraController = ref.read(cameraControllerNotifierProvider).controller;
+    if (cameraController == null) return;
+
+    // Stop image stream before capture (required on Android)
+    ref.read(detectionNotifierProvider.notifier).pauseDetection();
+
     // Apply flash mode before capture
     final flashMode = ref.read(flashModeNotifierProvider);
     await ref
@@ -77,6 +85,11 @@ class _CameraViewState extends ConsumerState<CameraView>
     final capturedImage = await ref
         .read(cameraControllerNotifierProvider.notifier)
         .capture();
+
+    // Restart image stream after capture
+    if (mounted) {
+      ref.read(detectionNotifierProvider.notifier).resumeDetection(cameraController);
+    }
 
     if (capturedImage != null && mounted) {
       widget.onImageCaptured?.call(capturedImage.path);
@@ -128,14 +141,17 @@ class _CameraViewState extends ConsumerState<CameraView>
       return _buildErrorView(context, cameraState.error!);
     }
 
-    // Start detection when camera is ready
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (cameraState.isInitialized && cameraState.controller != null) {
-        ref
-            .read(detectionNotifierProvider.notifier)
-            .startDetection(cameraState.controller!);
-      }
-    });
+    // Start detection when camera is ready (only once)
+    if (!_detectionStarted) {
+      _detectionStarted = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (cameraState.isInitialized && cameraState.controller != null) {
+          ref
+              .read(detectionNotifierProvider.notifier)
+              .startDetection(cameraState.controller!);
+        }
+      });
+    }
 
     return Stack(
       fit: StackFit.expand,

@@ -71,6 +71,9 @@ class DetectionNotifier extends _$DetectionNotifier {
   void resumeDetection(CameraController controller) {
     if (_isDetecting) return;
 
+    // Stop any existing stream first
+    _stopImageStream();
+
     _controller = controller;
     _isDetecting = true;
     _frameProcessor?.startProcessing(controller);
