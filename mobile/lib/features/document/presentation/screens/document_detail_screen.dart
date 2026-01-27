@@ -7,7 +7,7 @@ import '../../../gallery/domain/models/document.dart';
 import '../../../gallery/presentation/providers/documents_provider.dart';
 
 class DocumentDetailScreen extends ConsumerWidget {
-  const DocumentDetailScreen({super.key, required this.documentId});
+  const DocumentDetailScreen({required this.documentId, super.key});
 
   final String documentId;
 

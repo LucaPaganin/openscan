@@ -5,7 +5,7 @@ import '../../domain/models/document.dart';
 import '../providers/documents_provider.dart';
 
 class DocumentContextMenu extends ConsumerWidget {
-  const DocumentContextMenu({super.key, required this.document});
+  const DocumentContextMenu({required this.document, super.key});
 
   final Document document;
 

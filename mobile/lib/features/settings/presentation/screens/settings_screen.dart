@@ -11,7 +11,7 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDarkMode = ref.watch(themeModeNotifierProvider);
+    final isDarkMode = ref.watch(themeModeProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -28,7 +28,7 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: Text(isDarkMode ? 'Dark theme enabled' : 'Light theme enabled'),
                 value: isDarkMode,
                 onChanged: (value) {
-                  ref.read(themeModeNotifierProvider.notifier).setDarkMode(enabled: value);
+                  ref.read(themeModeProvider.notifier).setDarkMode(enabled: value);
                 },
                 secondary: Icon(
                   isDarkMode ? Icons.dark_mode : Icons.light_mode,

@@ -175,7 +175,7 @@ void main() {
 
         // Assert
         expect(listedFiles.length, equals(3));
-        final listedNames = listedFiles.map((f) => f.path.split('/').last);
+        final listedNames = listedFiles.map((f) => f.path.split(Platform.pathSeparator).last);
         expect(listedNames, containsAll(files));
       });
 

@@ -5,7 +5,7 @@ import '../../domain/models/document.dart';
 import 'document_context_menu.dart';
 
 class DocumentTile extends StatelessWidget {
-  const DocumentTile({super.key, required this.document});
+  const DocumentTile({required this.document, super.key});
 
   final Document document;
 

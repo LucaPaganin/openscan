@@ -32,7 +32,7 @@ class _CameraViewState extends ConsumerState<CameraView>
     WidgetsBinding.instance.addObserver(this);
     // Initialize camera after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(cameraControllerNotifierProvider.notifier).initialize();
+      ref.read(cameraControllerProvider.notifier).initialize();
     });
   }
 
@@ -44,7 +44,7 @@ class _CameraViewState extends ConsumerState<CameraView>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final cameraNotifier = ref.read(cameraControllerNotifierProvider.notifier);
+    final cameraNotifier = ref.read(cameraControllerProvider.notifier);
 
     switch (state) {
       case AppLifecycleState.inactive:
@@ -60,13 +60,13 @@ class _CameraViewState extends ConsumerState<CameraView>
 
   Future<void> _handleCapture() async {
     // Apply flash mode before capture
-    final flashMode = ref.read(flashModeNotifierProvider);
+    final flashMode = ref.read(flashModeProvider);
     await ref
-        .read(cameraControllerNotifierProvider.notifier)
+        .read(cameraControllerProvider.notifier)
         .setFlashMode(flashMode);
 
     final capturedImage = await ref
-        .read(cameraControllerNotifierProvider.notifier)
+        .read(cameraControllerProvider.notifier)
         .capture();
 
     if (capturedImage != null && mounted) {
@@ -84,27 +84,27 @@ class _CameraViewState extends ConsumerState<CameraView>
   }
 
   void _handleFlashToggle() {
-    ref.read(flashModeNotifierProvider.notifier).cycle();
+    ref.read(flashModeProvider.notifier).cycle();
     // Apply the new flash mode to the camera
-    final newFlashMode = ref.read(flashModeNotifierProvider);
+    final newFlashMode = ref.read(flashModeProvider);
     ref
-        .read(cameraControllerNotifierProvider.notifier)
+        .read(cameraControllerProvider.notifier)
         .setFlashMode(newFlashMode);
   }
 
   Future<void> _handleCameraFlip() async {
-    await ref.read(cameraControllerNotifierProvider.notifier).flipCamera();
+    await ref.read(cameraControllerProvider.notifier).flipCamera();
     // Re-apply flash mode after flip
-    final flashMode = ref.read(flashModeNotifierProvider);
+    final flashMode = ref.read(flashModeProvider);
     await ref
-        .read(cameraControllerNotifierProvider.notifier)
+        .read(cameraControllerProvider.notifier)
         .setFlashMode(flashMode);
   }
 
   @override
   Widget build(BuildContext context) {
-    final cameraState = ref.watch(cameraControllerNotifierProvider);
-    final flashMode = ref.watch(flashModeNotifierProvider);
+    final cameraState = ref.watch(cameraControllerProvider);
+    final flashMode = ref.watch(flashModeProvider);
 
     // Show loading while camera is initializing
     if (!cameraState.isInitialized || cameraState.controller == null) {
@@ -175,7 +175,7 @@ class _CameraViewState extends ConsumerState<CameraView>
             const SizedBox(height: 32),
             FilledButton.icon(
               onPressed: () {
-                ref.read(cameraControllerNotifierProvider.notifier).initialize();
+                ref.read(cameraControllerProvider.notifier).initialize();
               },
               icon: const Icon(Icons.refresh),
               label: const Text('Try Again'),

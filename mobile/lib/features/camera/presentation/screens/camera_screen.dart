@@ -41,13 +41,13 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     // Refresh permission status when app comes back to foreground
     // (user might have changed permission in settings)
     if (state == AppLifecycleState.resumed) {
-      ref.read(cameraPermissionNotifierProvider.notifier).refreshStatus();
+      ref.read(cameraPermissionProvider.notifier).refreshStatus();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final permissionState = ref.watch(cameraPermissionNotifierProvider);
+    final permissionState = ref.watch(cameraPermissionProvider);
 
     return Scaffold(
       // Hide app bar for full-screen camera preview when permission granted
@@ -87,7 +87,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
           isPermanentlyDenied: false,
           onActionPressed: () {
             ref
-                .read(cameraPermissionNotifierProvider.notifier)
+                .read(cameraPermissionProvider.notifier)
                 .requestPermission();
           },
         );
@@ -96,7 +96,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
         return CameraPermissionDeniedView(
           isPermanentlyDenied: true,
           onActionPressed: () {
-            ref.read(cameraPermissionNotifierProvider.notifier).openSettings();
+            ref.read(cameraPermissionProvider.notifier).openSettings();
           },
         );
 
@@ -104,7 +104,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
         // Auto-request permission on first load
         WidgetsBinding.instance.addPostFrameCallback((_) {
           ref
-              .read(cameraPermissionNotifierProvider.notifier)
+              .read(cameraPermissionProvider.notifier)
               .requestPermission();
         });
         return const CameraLoadingView(
@@ -173,7 +173,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
             const SizedBox(height: 32),
             FilledButton.icon(
               onPressed: () {
-                ref.invalidate(cameraPermissionNotifierProvider);
+                ref.invalidate(cameraPermissionProvider);
               },
               icon: const Icon(Icons.refresh),
               label: const Text('Try Again'),

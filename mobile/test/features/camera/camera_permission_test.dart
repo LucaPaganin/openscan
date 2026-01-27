@@ -174,9 +174,9 @@ void main() {
         addTearDown(container.dispose);
 
         // Wait for the provider to initialize
-        await container.read(cameraPermissionNotifierProvider.future);
+        await container.read(cameraPermissionProvider.future);
 
-        final state = container.read(cameraPermissionNotifierProvider);
+        final state = container.read(cameraPermissionProvider);
 
         expect(state.value, CameraPermissionState.granted);
       },
@@ -196,9 +196,9 @@ void main() {
         );
         addTearDown(container.dispose);
 
-        await container.read(cameraPermissionNotifierProvider.future);
+        await container.read(cameraPermissionProvider.future);
 
-        final state = container.read(cameraPermissionNotifierProvider);
+        final state = container.read(cameraPermissionProvider);
 
         expect(state.value, CameraPermissionState.denied);
       },
@@ -218,9 +218,9 @@ void main() {
         );
         addTearDown(container.dispose);
 
-        await container.read(cameraPermissionNotifierProvider.future);
+        await container.read(cameraPermissionProvider.future);
 
-        final state = container.read(cameraPermissionNotifierProvider);
+        final state = container.read(cameraPermissionProvider);
 
         expect(state.value, CameraPermissionState.permanentlyDenied);
       },

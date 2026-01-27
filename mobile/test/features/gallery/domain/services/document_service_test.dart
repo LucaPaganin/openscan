@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
-import 'package:openscan/core/errors/document_exceptions.dart';
 import 'package:openscan/features/gallery/data/repositories/document_repository.dart';
 import 'package:openscan/features/gallery/domain/services/document_service.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
