@@ -3,7 +3,10 @@
     "allow": [
       "Bash(flutter analyze:*)",
       "Bash(cmd.exe /c \"where flutter\")",
-      "Bash(cmd.exe /c \"where flutter 2>&1\")"
+      "Bash(cmd.exe /c \"where flutter 2>&1\")",
+      "Bash(where flutter:*)",
+      "Bash(dart run build_runner:*)",
+      "Bash(flutter test:*)"
     ]
   }
 }
